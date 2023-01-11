@@ -6,6 +6,7 @@ import { Wishlist } from './entities/wishlist.entity';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Wishlist])],
+  exports: [WishlistsService],
   controllers: [WishlistsController],
   providers: [WishlistsService],
 })
