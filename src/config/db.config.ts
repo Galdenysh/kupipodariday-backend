@@ -1,4 +1,8 @@
 import { registerAs } from '@nestjs/config';
+import { Offer } from 'src/offers/entities/offer.entity';
+import { User } from 'src/users/entities/user.entity';
+import { Wish } from 'src/wishes/entities/wish.entity';
+import { Wishlist } from 'src/wishlists/entities/wishlist.entity';
 
 export default registerAs('database', () => {
   return {
@@ -8,7 +12,7 @@ export default registerAs('database', () => {
     username: process.env.DB_USERNAME ?? 'student',
     password: process.env.DB_PASSWORD ?? 'student',
     database: process.env.DB_DATABASE ?? 'nest_project',
-    entities: [],
+    entities: [User, Wish, Wishlist, Offer],
     synchronize: true,
   };
 });
