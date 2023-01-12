@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { hashPass } from 'src/utils/hashPass';
+import { Wish } from 'src/wishes/entities/wish.entity';
 import { Repository, UpdateResult } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { GetUserDto } from './dto/get-user.dto';
@@ -101,5 +102,22 @@ export class UsersService {
       updateUserDto.password = await hashPass(updateUserDto.password);
 
     return this.userRepository.update({ id }, updateUserDto);
+  }
+
+  async findWishes(id: number): Promise<Wish[]> {
+    const { wishes } = await this.userRepository.findOne({
+      where: { id },
+      select: {
+        wishes: true,
+      },
+      relations: {
+        wishes: {
+          owner: true,
+          offers: true,
+        },
+      },
+    });
+
+    return wishes;
   }
 }

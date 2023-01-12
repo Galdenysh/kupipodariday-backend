@@ -42,6 +42,11 @@ export class UsersController {
     return await this.usersService.update(user.id, updateUserDto);
   }
 
+  @Get('me/wishes')
+  async getWishesMe(@Req() { user }: { user: User }) {
+    return await this.usersService.findWishes(user.id);
+  }
+
   @Post('find')
   async findUser(@Body() { query }: { query: string }) {
     return await this.usersService.findMany(query);
@@ -50,5 +55,12 @@ export class UsersController {
   @Get(':username')
   async findByUsername(@Param('username') username: string) {
     return await this.usersService.findByUsernamePublic(username);
+  }
+
+  @Get(':username/wishes')
+  async getWishes(@Param('username') username: string) {
+    const user = await this.usersService.findByUsernamePublic(username);
+
+    return await this.usersService.findWishes(user.id);
   }
 }
