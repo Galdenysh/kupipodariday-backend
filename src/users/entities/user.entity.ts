@@ -35,7 +35,7 @@ export class User {
   updatedAt: Date;
 
   // username
-  @Column()
+  @Column({ unique: true })
   @IsString()
   @Length(2, 30)
   @IsNotEmpty()

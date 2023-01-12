@@ -5,7 +5,6 @@ import {
   Body,
   Patch,
   Param,
-  Delete,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -21,34 +20,35 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
+  async create(@Body() createUserDto: CreateUserDto) {
+    return await this.usersService.create(createUserDto);
   }
 
   @Get()
-  findAll() {
-    return this.usersService.findAll();
+  async findAll() {
+    return await this.usersService.findAll();
   }
 
   @Get('me')
   async findMe(@Req() { user }: { user: User }) {
-    console.log(await this.usersService.findOne(user.id));
-
     return await this.usersService.findOne(user.id);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.usersService.findOne(+id);
+  @Patch('me')
+  async updateMe(
+    @Req() { user }: { user: User },
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
+    return await this.usersService.update(user.id, updateUserDto);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(+id, updateUserDto);
+  @Post('find')
+  async findUser(@Body() { query }: { query: string }) {
+    return await this.usersService.findMany(query);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.usersService.remove(+id);
+  @Get(':username')
+  async findByUsername(@Param('username') username: string) {
+    return await this.usersService.findByUsernamePublic(username);
   }
 }
