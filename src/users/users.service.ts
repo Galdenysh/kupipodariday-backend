@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { hashPass } from 'src/utils/hashPass';
 import { DeleteResult, Repository, UpdateResult } from 'typeorm';
@@ -27,7 +27,11 @@ export class UsersService {
   }
 
   async findOne(id: number): Promise<User> {
-    return this.userRepository.findOneBy({ id });
+    const user = await this.userRepository.findOneBy({ id });
+
+    if (!user) throw new UnauthorizedException();
+
+    return user;
   }
 
   async findByUsername(username: string): Promise<User> {
