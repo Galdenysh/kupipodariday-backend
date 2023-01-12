@@ -1,12 +1,14 @@
-import { IsNumber, IsString, IsUrl, Length } from 'class-validator';
+import { IsDate, IsNumber, IsString, IsUrl, Length } from 'class-validator';
 import { Offer } from 'src/offers/entities/offer.entity';
 import { User } from 'src/users/entities/user.entity';
 import {
   Column,
+  CreateDateColumn,
   Entity,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 
 @Entity()
@@ -16,11 +18,13 @@ export class Wish {
   id: number;
 
   // createdAt
-  @Column()
+  @CreateDateColumn()
+  @IsDate()
   createdAt: Date;
 
   // updatedAt
-  @Column()
+  @UpdateDateColumn()
+  @IsDate()
   updatedAt: Date;
 
   // name

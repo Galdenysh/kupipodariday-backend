@@ -1,8 +1,22 @@
-import { IsEmail, IsNotEmpty, IsString, IsUrl, Length } from 'class-validator';
+import {
+  IsDate,
+  IsEmail,
+  IsNotEmpty,
+  IsString,
+  IsUrl,
+  Length,
+} from 'class-validator';
 import { Wish } from 'src/wishes/entities/wish.entity';
 import { Offer } from 'src/offers/entities/offer.entity';
 import { Wishlist } from 'src/wishlists/entities/wishlist.entity';
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 @Entity()
 export class User {
@@ -11,11 +25,13 @@ export class User {
   id: number;
 
   // createdAt
-  @Column()
+  @CreateDateColumn()
+  @IsDate()
   createdAt: Date;
 
   // updatedAt
-  @Column()
+  @UpdateDateColumn()
+  @IsDate()
   updatedAt: Date;
 
   // username
