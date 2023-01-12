@@ -34,6 +34,12 @@ export class UsersService {
     return await this.userRepository.findOneBy({ username });
   }
 
+  async findMany(query: string): Promise<User[]> {
+    return await this.userRepository.find({
+      where: [{ username: query }, { email: query }],
+    });
+  }
+
   async update(
     id: number,
     updateUserDto: UpdateUserDto,
