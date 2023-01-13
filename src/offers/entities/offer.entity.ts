@@ -1,4 +1,4 @@
-import { IsBoolean, IsDate, IsNumber } from 'class-validator';
+import { IsBoolean, IsDate } from 'class-validator';
 import { User } from 'src/users/entities/user.entity';
 import { toFixed } from 'src/utils/toFixed';
 import { Wish } from 'src/wishes/entities/wish.entity';

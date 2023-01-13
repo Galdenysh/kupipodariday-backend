@@ -51,7 +51,7 @@ export class WishesController {
     @Param('id') id: number,
     @Body() updateWishDto: UpdateWishDto,
   ) {
-    return await this.wishesService.update(+id, updateWishDto, user.id);
+    return await this.wishesService.update(+id, user.id, updateWishDto);
   }
 
   @UseGuards(AuthGuard('jwt'))

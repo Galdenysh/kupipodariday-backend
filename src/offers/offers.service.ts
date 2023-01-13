@@ -1,8 +1,4 @@
-import {
-  ConflictException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UsersService } from 'src/users/users.service';
 import { WishesService } from 'src/wishes/wishes.service';
@@ -22,10 +18,6 @@ export class OffersService {
   async create(userId: number, createOfferDto: CreateOfferDto): Promise<Offer> {
     const user = await this.usersService.findOne(userId);
     const wish = await this.wishesService.findOne(createOfferDto.itemId);
-
-    if (!user) throw new NotFoundException();
-
-    if (!wish) throw new NotFoundException();
 
     if (wish.owner.id === userId) throw new ConflictException();
 
