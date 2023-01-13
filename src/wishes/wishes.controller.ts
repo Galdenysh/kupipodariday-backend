@@ -6,37 +6,63 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
+  Req,
 } from '@nestjs/common';
 import { WishesService } from './wishes.service';
 import { CreateWishDto } from './dto/create-wish.dto';
 import { UpdateWishDto } from './dto/update-wish.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { User } from 'src/users/entities/user.entity';
 
 @Controller('wishes')
 export class WishesController {
   constructor(private readonly wishesService: WishesService) {}
 
+  @UseGuards(AuthGuard('jwt'))
   @Post()
-  create(@Body() createWishDto: CreateWishDto) {
-    return this.wishesService.create(createWishDto);
+  create(
+    @Req() { user }: { user: User },
+    @Body() createWishDto: CreateWishDto,
+  ) {
+    return this.wishesService.create(user.id, createWishDto);
   }
 
-  @Get()
-  findAll() {
-    return this.wishesService.findAll();
+  @Get('last')
+  async findLast() {
+    return await this.wishesService.findLast();
   }
 
+  @Get('top')
+  async findTop() {
+    return await this.wishesService.findTop();
+  }
+
+  @UseGuards(AuthGuard('jwt'))
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.wishesService.findOne(+id);
+  async findOne(@Param('id') id: string) {
+    return await this.wishesService.findOne(+id);
   }
 
+  @UseGuards(AuthGuard('jwt'))
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateWishDto: UpdateWishDto) {
-    return this.wishesService.update(+id, updateWishDto);
+  async update(
+    @Req() { user }: { user: User },
+    @Param('id') id: string,
+    @Body() updateWishDto: UpdateWishDto,
+  ) {
+    return await this.wishesService.update(+id, updateWishDto, user.id);
   }
 
+  @UseGuards(AuthGuard('jwt'))
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.wishesService.remove(+id);
+  async remove(@Req() { user }: { user: User }, @Param('id') id: string) {
+    return await this.wishesService.remove(+id, user.id);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Post(':id/copy')
+  async copy(@Req() { user }: { user: User }, @Param('id') id: string) {
+    return await this.wishesService.copy(+id, user.id);
   }
 }

@@ -45,30 +45,39 @@ export class Wish {
 
   // price
   @Column({
+    type: 'numeric',
     transformer: {
       from(value: number) {
         return value;
       },
       to(value: number) {
-        return value.toFixed(2);
+        if (value) {
+          if (!Number.isInteger(value)) return value.toFixed(2);
+        }
+
+        return value;
       },
     },
   })
-  @IsNumber()
   price: number;
 
   // raised
   @Column({
+    type: 'numeric',
+    default: 0,
     transformer: {
       from(value: number) {
         return value;
       },
       to(value: number) {
-        return value.toFixed(2);
+        if (value) {
+          if (!Number.isInteger(value)) return value.toFixed(2);
+        }
+
+        return value;
       },
     },
   })
-  @IsNumber()
   raised: number;
 
   // description
