@@ -40,7 +40,7 @@ export class WishesController {
 
   @UseGuards(AuthGuard('jwt'))
   @Get(':id')
-  async findOne(@Param('id') id: string) {
+  async findOne(@Param('id') id: number) {
     return await this.wishesService.findOne(+id);
   }
 
@@ -48,7 +48,7 @@ export class WishesController {
   @Patch(':id')
   async update(
     @Req() { user }: { user: User },
-    @Param('id') id: string,
+    @Param('id') id: number,
     @Body() updateWishDto: UpdateWishDto,
   ) {
     return await this.wishesService.update(+id, updateWishDto, user.id);
@@ -56,13 +56,13 @@ export class WishesController {
 
   @UseGuards(AuthGuard('jwt'))
   @Delete(':id')
-  async remove(@Req() { user }: { user: User }, @Param('id') id: string) {
+  async remove(@Req() { user }: { user: User }, @Param('id') id: number) {
     return await this.wishesService.remove(+id, user.id);
   }
 
   @UseGuards(AuthGuard('jwt'))
   @Post(':id/copy')
-  async copy(@Req() { user }: { user: User }, @Param('id') id: string) {
+  async copy(@Req() { user }: { user: User }, @Param('id') id: number) {
     return await this.wishesService.copy(+id, user.id);
   }
 }

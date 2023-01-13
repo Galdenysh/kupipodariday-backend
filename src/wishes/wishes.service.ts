@@ -20,6 +20,9 @@ export class WishesService {
 
   async create(id: number, createWishDto: CreateWishDto): Promise<Wish> {
     const user = await this.usersService.findOne(id);
+
+    if (!user) throw new NotFoundException();
+
     const wish = this.wishRepository.create({
       owner: user,
       ...createWishDto,
@@ -96,6 +99,14 @@ export class WishesService {
     if (wish.owner.id !== ownerId) throw new ConflictException();
 
     return this.wishRepository.update({ id }, updateWishDto);
+  }
+
+  async updateRaised(id: number, raised: number): Promise<UpdateResult> {
+    const wish = await this.wishRepository.findOneBy({ id });
+
+    if (!wish) throw new NotFoundException();
+
+    return this.wishRepository.update({ id }, { raised });
   }
 
   async remove(id: number, ownerId: number): Promise<DeleteResult> {

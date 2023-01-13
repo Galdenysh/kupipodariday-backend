@@ -1,5 +1,6 @@
 import { IsBoolean, IsDate, IsNumber } from 'class-validator';
 import { User } from 'src/users/entities/user.entity';
+import { toFixed } from 'src/utils/toFixed';
 import { Wish } from 'src/wishes/entities/wish.entity';
 import {
   Column,
@@ -28,16 +29,17 @@ export class Offer {
 
   // amount
   @Column({
+    type: 'numeric',
+    default: 0,
     transformer: {
       from(value: number) {
         return value;
       },
       to(value: number) {
-        return value.toFixed(2);
+        return toFixed(value, 2);
       },
     },
   })
-  @IsNumber()
   amount: number;
 
   // hidden
@@ -46,7 +48,7 @@ export class Offer {
   hidden: boolean;
 
   // relationships
-  @ManyToOne(() => User, (user) => user.offers)
+  @ManyToOne(() => User, (user) => user.id)
   user: User;
 
   @ManyToOne(() => Wish, (wish) => wish.offers)
