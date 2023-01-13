@@ -13,6 +13,9 @@ import { JwtStrategy } from './strategy/jwt.strategy';
     UsersModule,
     JwtModule.register({
       secret: process.env.JWT_SECRET ?? 'secret',
+      signOptions: {
+        expiresIn: process.env.JWT_EXPIRES ?? 10000,
+      },
     }),
   ],
   controllers: [AuthController],

@@ -28,11 +28,13 @@ npm run start:dev
 
 - PORT
 - JWT_SECRET
+- JWT_EXPIRES
 - DB_TYPE
 - DB_HOST
 - DB_PORT
 - DB_USERNAME
 - DB_PASSWORD
 - DB_DATABASE
+- DB_SYNCHRONIZE
 
-Если не указать переменные, то будут использованиы значения по умолчанию.
+Если не указать переменные, то будут использованы значения по умолчанию.

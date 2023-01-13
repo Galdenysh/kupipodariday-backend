@@ -4,8 +4,13 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import {
+  INSUFFICIENT_ERROR,
+  REISED_NOT_EMPTY,
+  WISH_NOT_FOUND,
+} from 'src/config/errors';
 import { UsersService } from 'src/users/users.service';
-import { DeleteResult, Repository, UpdateResult } from 'typeorm';
+import { Repository, UpdateResult } from 'typeorm';
 import { CreateWishDto } from './dto/create-wish.dto';
 import { UpdateWishDto } from './dto/update-wish.dto';
 import { Wish } from './entities/wish.entity';
@@ -18,7 +23,7 @@ export class WishesService {
     private usersService: UsersService,
   ) {}
 
-  async create(id: number, createWishDto: CreateWishDto): Promise<Wish> {
+  async create(id: number, createWishDto: CreateWishDto): Promise<object> {
     const user = await this.usersService.findOne(id);
     const wish = this.wishRepository.create({
       owner: user,
@@ -28,7 +33,9 @@ export class WishesService {
     delete wish.owner.email;
     delete wish.owner.password;
 
-    return await this.wishRepository.save(wish);
+    await this.wishRepository.save(wish);
+
+    return {};
   }
 
   async findLast(): Promise<Wish[]> {
@@ -76,7 +83,7 @@ export class WishesService {
       },
     });
 
-    if (!wish) throw new NotFoundException();
+    if (!wish) throw new NotFoundException(WISH_NOT_FOUND);
 
     delete wish.owner.email;
     delete wish.owner.password;
@@ -88,40 +95,49 @@ export class WishesService {
     id: number,
     ownerId: number,
     updateWishDto: UpdateWishDto,
-  ): Promise<UpdateResult> {
+  ): Promise<object> {
     const wish = await this.wishRepository.findOneBy({ id });
 
-    if (!wish) throw new NotFoundException();
+    if (!wish) throw new NotFoundException(WISH_NOT_FOUND);
 
-    if (wish.raised !== 0) throw new ConflictException();
+    if (wish.raised !== 0) throw new ConflictException(REISED_NOT_EMPTY);
 
-    if (wish.owner.id !== ownerId) throw new ConflictException();
+    if (wish.owner.id !== ownerId)
+      throw new ConflictException(INSUFFICIENT_ERROR);
 
-    return this.wishRepository.update({ id }, updateWishDto);
+    this.wishRepository.update({ id }, updateWishDto);
+
+    return {};
   }
 
   async updateRaised(id: number, raised: number): Promise<UpdateResult> {
     const wish = await this.wishRepository.findOneBy({ id });
 
-    if (!wish) throw new NotFoundException();
+    if (!wish) throw new NotFoundException(WISH_NOT_FOUND);
 
     return this.wishRepository.update({ id }, { raised });
   }
 
-  async remove(id: number, ownerId: number): Promise<DeleteResult> {
-    const wish = await this.wishRepository.findOneBy({ id });
+  async remove(id: number, ownerId: number): Promise<Wish> {
+    const wish = await this.wishRepository.findOne({
+      where: { id },
+      relations: { owner: true },
+    });
 
-    if (!wish) throw new NotFoundException();
+    if (!wish) throw new NotFoundException(WISH_NOT_FOUND);
 
-    if (wish.owner.id !== ownerId) throw new ConflictException();
+    if (wish.owner.id !== ownerId)
+      throw new ConflictException(INSUFFICIENT_ERROR);
 
-    return await this.wishRepository.delete({ id });
+    await this.wishRepository.delete({ id });
+
+    return wish;
   }
 
-  async copy(id: number, ownerId: number): Promise<Wish> {
+  async copy(id: number, ownerId: number): Promise<object> {
     const wish = await this.wishRepository.findOneBy({ id });
 
-    if (!wish) throw new NotFoundException();
+    if (!wish) throw new NotFoundException(WISH_NOT_FOUND);
 
     const dto = {
       name: wish.name,

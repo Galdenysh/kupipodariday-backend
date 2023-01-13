@@ -4,10 +4,12 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { UNIQUE_ERROR, USER_NOT_FOUND } from 'src/config/errors';
 import { hashPass } from 'src/utils/hashPass';
 import { Wish } from 'src/wishes/entities/wish.entity';
-import { Repository, UpdateResult } from 'typeorm';
+import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
+import { GetUserPublicDto } from './dto/get-user-public.dto';
 import { GetUserDto } from './dto/get-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
@@ -26,6 +28,9 @@ export class UsersService {
     try {
       await this.userRepository.save(user);
     } catch (err) {
+      if (err.code && err.code === '23505')
+        throw new ConflictException(UNIQUE_ERROR);
+
       throw new ConflictException();
     }
 
@@ -36,22 +41,25 @@ export class UsersService {
     return this.userRepository.find();
   }
 
-  async findOne(id: number): Promise<User> {
+  async findOne(id: number): Promise<GetUserDto> {
     const user = await this.userRepository.findOneBy({ id });
 
-    if (!user) throw new NotFoundException();
+    if (!user) throw new NotFoundException(USER_NOT_FOUND);
 
-    return user;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password, ...rest } = user;
+
+    return rest;
   }
 
   async findByUsername(username: string): Promise<User> {
     return await this.userRepository.findOneBy({ username });
   }
 
-  async findByUsernamePublic(username: string): Promise<GetUserDto> {
+  async findByUsernamePublic(username: string): Promise<GetUserPublicDto> {
     const user = await this.userRepository.findOneBy({ username });
 
-    if (!user) throw new NotFoundException();
+    if (!user) throw new NotFoundException(USER_NOT_FOUND);
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password, email, ...rest } = user;
@@ -67,7 +75,7 @@ export class UsersService {
     if (users.length !== 0) {
       const usersWithoutPass = users.map((item) => {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { password, email, ...rest } = item;
+        const { password, ...rest } = item;
 
         return rest;
       });
@@ -78,30 +86,29 @@ export class UsersService {
     return users;
   }
 
-  async update(
-    id: number,
-    updateUserDto: UpdateUserDto,
-  ): Promise<UpdateResult> {
+  async update(id: number, updateUserDto: UpdateUserDto): Promise<GetUserDto> {
     const user = await this.userRepository.findOneBy({ id });
 
-    if (!user) throw new NotFoundException();
+    if (!user) throw new NotFoundException(USER_NOT_FOUND);
 
     if (updateUserDto.username && updateUserDto.username !== user.username) {
       const foundedUser = await this.findMany(updateUserDto.username);
 
-      if (foundedUser.length !== 0) throw new ConflictException();
+      if (foundedUser.length !== 0) throw new ConflictException(UNIQUE_ERROR);
     }
 
-    if (updateUserDto.username && updateUserDto.email !== user.email) {
+    if (updateUserDto.email && updateUserDto.email !== user.email) {
       const foundedUser = await this.findMany(updateUserDto.email);
 
-      if (foundedUser.length !== 0) throw new ConflictException();
+      if (foundedUser.length !== 0) throw new ConflictException(UNIQUE_ERROR);
     }
 
     if (updateUserDto && updateUserDto.password)
       updateUserDto.password = await hashPass(updateUserDto.password);
 
-    return this.userRepository.update({ id }, updateUserDto);
+    await this.userRepository.update({ id }, updateUserDto);
+
+    return await this.findOne(id);
   }
 
   async findWishes(id: number): Promise<Wish[]> {

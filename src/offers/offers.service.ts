@@ -1,5 +1,6 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { OWNER_ERROR, RAISER_ERROR } from 'src/config/errors';
 import { UsersService } from 'src/users/users.service';
 import { WishesService } from 'src/wishes/wishes.service';
 import { Repository } from 'typeorm';
@@ -15,15 +16,18 @@ export class OffersService {
     private wishesService: WishesService,
   ) {}
 
-  async create(userId: number, createOfferDto: CreateOfferDto): Promise<Offer> {
+  async create(
+    userId: number,
+    createOfferDto: CreateOfferDto,
+  ): Promise<object> {
     const user = await this.usersService.findOne(userId);
     const wish = await this.wishesService.findOne(createOfferDto.itemId);
 
-    if (wish.owner.id === userId) throw new ConflictException();
+    if (wish.owner.id === userId) throw new ConflictException(OWNER_ERROR);
 
-    const raised = Number(createOfferDto.amount) + Number(wish.raised);
+    const raised = createOfferDto.amount + wish.raised;
 
-    if (raised > wish.price) throw new ConflictException();
+    if (raised > wish.price) throw new ConflictException(RAISER_ERROR);
 
     await this.wishesService.updateRaised(wish.id, raised);
 
@@ -33,12 +37,11 @@ export class OffersService {
       ...createOfferDto,
     };
 
-    delete offerData.user.email;
-    delete offerData.user.password;
-
     const offer = this.offerRepository.create(offerData);
 
-    return await this.offerRepository.save(offer);
+    await this.offerRepository.save(offer);
+
+    return {};
   }
 
   async findAll(): Promise<Offer[]> {
@@ -50,7 +53,6 @@ export class OffersService {
     });
 
     offers.forEach((item) => {
-      delete item.user.email;
       delete item.user.password;
     });
 
@@ -66,7 +68,6 @@ export class OffersService {
       },
     });
 
-    delete offer.user.email;
     delete offer.user.password;
 
     return offer;

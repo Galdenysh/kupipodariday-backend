@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { USER_NOT_FOUND } from 'src/config/errors';
 import { User } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/users.service';
 import { comparePass } from 'src/utils/hashPass';
@@ -21,7 +22,7 @@ export class AuthService {
     const user = await this.usersService.findByUsername(username);
 
     if (!user) {
-      throw new NotFoundException();
+      throw new NotFoundException(USER_NOT_FOUND);
     }
 
     const isMatch = await comparePass(password, user.password);

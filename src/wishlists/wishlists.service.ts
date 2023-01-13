@@ -4,9 +4,10 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { INSUFFICIENT_ERROR, WISHLIST_NOT_FOUND } from 'src/config/errors';
 import { UsersService } from 'src/users/users.service';
 import { WishesService } from 'src/wishes/wishes.service';
-import { DeleteResult, Repository, UpdateResult } from 'typeorm';
+import { Repository } from 'typeorm';
 import { CreateWishlistDto } from './dto/create-wishlist.dto';
 import { UpdateWishlistDto } from './dto/update-wishlist.dto';
 import { Wishlist } from './entities/wishlist.entity';
@@ -34,8 +35,10 @@ export class WishlistsService {
         return wish;
       }),
     );
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { email, ...rest } = user;
     const wishlist = this.wishlistRepository.create({
-      owner: user,
+      owner: rest,
       items: wishes,
       ...createWishlistDto,
     });
@@ -68,7 +71,7 @@ export class WishlistsService {
       },
     });
 
-    if (!wishlist) throw new NotFoundException();
+    if (!wishlist) throw new NotFoundException(WISHLIST_NOT_FOUND);
 
     delete wishlist.owner.email;
     delete wishlist.owner.password;
@@ -80,10 +83,11 @@ export class WishlistsService {
     id: number,
     userId: number,
     updateWishlistDto: UpdateWishlistDto,
-  ): Promise<UpdateResult> {
+  ): Promise<Wishlist> {
     const wishlist = await this.findOne(id);
 
-    if (wishlist.owner.id !== userId) throw new ConflictException();
+    if (wishlist.owner.id !== userId)
+      throw new ConflictException(INSUFFICIENT_ERROR);
 
     const wishes = await Promise.all(
       updateWishlistDto.itemsId.map(async (item) => {
@@ -103,14 +107,19 @@ export class WishlistsService {
       ...wishlist,
     };
 
-    return await this.wishlistRepository.update({ id }, wishlistData);
+    await this.wishlistRepository.update({ id }, wishlistData);
+
+    return await this.findOne(id);
   }
 
-  async remove(id: number, userId: number): Promise<DeleteResult> {
+  async remove(id: number, userId: number): Promise<Wishlist> {
     const wishlist = await this.findOne(id);
 
-    if (wishlist.owner.id !== userId) throw new ConflictException();
+    if (wishlist.owner.id !== userId)
+      throw new ConflictException(INSUFFICIENT_ERROR);
 
-    return this.wishlistRepository.delete({ id });
+    this.wishlistRepository.delete({ id });
+
+    return wishlist;
   }
 }

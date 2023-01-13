@@ -1,4 +1,4 @@
-import { IsBoolean, IsDate } from 'class-validator';
+import { IsBoolean, IsDate, IsInt } from 'class-validator';
 import { User } from 'src/users/entities/user.entity';
 import { toFixed } from 'src/utils/toFixed';
 import { Wish } from 'src/wishes/entities/wish.entity';
@@ -29,7 +29,7 @@ export class Offer {
 
   // amount
   @Column({
-    type: 'numeric',
+    type: 'int',
     default: 0,
     transformer: {
       from(value: number) {
@@ -40,6 +40,7 @@ export class Offer {
       },
     },
   })
+  @IsInt()
   amount: number;
 
   // hidden
