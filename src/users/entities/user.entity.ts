@@ -55,11 +55,13 @@ export class User {
   // email
   @Column({ unique: true })
   @IsEmail()
+  @IsNotEmpty()
   email: string;
 
   // password
   @Column()
   @IsString()
+  @IsNotEmpty()
   password: string;
 
   // relationships

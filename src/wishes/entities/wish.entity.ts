@@ -1,4 +1,11 @@
-import { IsDate, IsNumber, IsString, IsUrl, Length } from 'class-validator';
+import {
+  IsDate,
+  IsInt,
+  IsNumber,
+  IsString,
+  IsUrl,
+  Length,
+} from 'class-validator';
 import { Offer } from 'src/offers/entities/offer.entity';
 import { User } from 'src/users/entities/user.entity';
 import { toFixed } from 'src/utils/toFixed';
@@ -81,7 +88,7 @@ export class Wish {
 
   // copied
   @Column('int', { default: 0 })
-  @IsNumber()
+  @IsInt()
   copied: number;
 
   // relationships

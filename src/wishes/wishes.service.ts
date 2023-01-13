@@ -115,7 +115,10 @@ export class WishesService {
   }
 
   async remove(id: number, ownerId: number): Promise<DeleteResult> {
-    const wish = await this.wishRepository.findOneBy({ id });
+    const wish = await this.wishRepository.findOne({
+      where: { id },
+      relations: { owner: true },
+    });
 
     if (!wish) throw new NotFoundException(WISH_NOT_FOUND);
 
