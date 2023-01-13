@@ -13,6 +13,6 @@ export default registerAs('database', () => {
     password: process.env.DB_PASSWORD ?? 'student',
     database: process.env.DB_DATABASE ?? 'nest_project',
     entities: [User, Wish, Wishlist, Offer],
-    synchronize: true,
+    synchronize: process.env.DB_SYNCHRONIZE ?? true,
   };
 });

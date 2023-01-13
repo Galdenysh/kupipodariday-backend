@@ -4,6 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { UNIQUE_ERROR, USER_NOT_FOUND } from 'src/config/errors';
 import { hashPass } from 'src/utils/hashPass';
 import { Wish } from 'src/wishes/entities/wish.entity';
 import { Repository, UpdateResult } from 'typeorm';
@@ -26,6 +27,9 @@ export class UsersService {
     try {
       await this.userRepository.save(user);
     } catch (err) {
+      if (err.code && err.code === '23505')
+        throw new ConflictException(UNIQUE_ERROR);
+
       throw new ConflictException();
     }
 
@@ -39,7 +43,7 @@ export class UsersService {
   async findOne(id: number): Promise<User> {
     const user = await this.userRepository.findOneBy({ id });
 
-    if (!user) throw new NotFoundException();
+    if (!user) throw new NotFoundException(USER_NOT_FOUND);
 
     return user;
   }
@@ -51,7 +55,7 @@ export class UsersService {
   async findByUsernamePublic(username: string): Promise<GetUserDto> {
     const user = await this.userRepository.findOneBy({ username });
 
-    if (!user) throw new NotFoundException();
+    if (!user) throw new NotFoundException(USER_NOT_FOUND);
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password, email, ...rest } = user;
@@ -84,18 +88,18 @@ export class UsersService {
   ): Promise<UpdateResult> {
     const user = await this.userRepository.findOneBy({ id });
 
-    if (!user) throw new NotFoundException();
+    if (!user) throw new NotFoundException(USER_NOT_FOUND);
 
     if (updateUserDto.username && updateUserDto.username !== user.username) {
       const foundedUser = await this.findMany(updateUserDto.username);
 
-      if (foundedUser.length !== 0) throw new ConflictException();
+      if (foundedUser.length !== 0) throw new ConflictException(UNIQUE_ERROR);
     }
 
     if (updateUserDto.username && updateUserDto.email !== user.email) {
       const foundedUser = await this.findMany(updateUserDto.email);
 
-      if (foundedUser.length !== 0) throw new ConflictException();
+      if (foundedUser.length !== 0) throw new ConflictException(UNIQUE_ERROR);
     }
 
     if (updateUserDto && updateUserDto.password)

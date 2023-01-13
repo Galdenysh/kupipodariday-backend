@@ -4,6 +4,11 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import {
+  INSUFFICIENT_ERROR,
+  REISED_NOT_EMPTY,
+  WISH_NOT_FOUND,
+} from 'src/config/errors';
 import { UsersService } from 'src/users/users.service';
 import { DeleteResult, Repository, UpdateResult } from 'typeorm';
 import { CreateWishDto } from './dto/create-wish.dto';
@@ -76,7 +81,7 @@ export class WishesService {
       },
     });
 
-    if (!wish) throw new NotFoundException();
+    if (!wish) throw new NotFoundException(WISH_NOT_FOUND);
 
     delete wish.owner.email;
     delete wish.owner.password;
@@ -91,11 +96,12 @@ export class WishesService {
   ): Promise<UpdateResult> {
     const wish = await this.wishRepository.findOneBy({ id });
 
-    if (!wish) throw new NotFoundException();
+    if (!wish) throw new NotFoundException(WISH_NOT_FOUND);
 
-    if (wish.raised !== 0) throw new ConflictException();
+    if (wish.raised !== 0) throw new ConflictException(REISED_NOT_EMPTY);
 
-    if (wish.owner.id !== ownerId) throw new ConflictException();
+    if (wish.owner.id !== ownerId)
+      throw new ConflictException(INSUFFICIENT_ERROR);
 
     return this.wishRepository.update({ id }, updateWishDto);
   }
@@ -103,7 +109,7 @@ export class WishesService {
   async updateRaised(id: number, raised: number): Promise<UpdateResult> {
     const wish = await this.wishRepository.findOneBy({ id });
 
-    if (!wish) throw new NotFoundException();
+    if (!wish) throw new NotFoundException(WISH_NOT_FOUND);
 
     return this.wishRepository.update({ id }, { raised });
   }
@@ -111,9 +117,10 @@ export class WishesService {
   async remove(id: number, ownerId: number): Promise<DeleteResult> {
     const wish = await this.wishRepository.findOneBy({ id });
 
-    if (!wish) throw new NotFoundException();
+    if (!wish) throw new NotFoundException(WISH_NOT_FOUND);
 
-    if (wish.owner.id !== ownerId) throw new ConflictException();
+    if (wish.owner.id !== ownerId)
+      throw new ConflictException(INSUFFICIENT_ERROR);
 
     return await this.wishRepository.delete({ id });
   }
@@ -121,7 +128,7 @@ export class WishesService {
   async copy(id: number, ownerId: number): Promise<Wish> {
     const wish = await this.wishRepository.findOneBy({ id });
 
-    if (!wish) throw new NotFoundException();
+    if (!wish) throw new NotFoundException(WISH_NOT_FOUND);
 
     const dto = {
       name: wish.name,

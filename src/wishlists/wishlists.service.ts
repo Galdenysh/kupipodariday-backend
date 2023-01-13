@@ -4,6 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { INSUFFICIENT_ERROR, WISHLIST_NOT_FOUND } from 'src/config/errors';
 import { UsersService } from 'src/users/users.service';
 import { WishesService } from 'src/wishes/wishes.service';
 import { DeleteResult, Repository, UpdateResult } from 'typeorm';
@@ -68,7 +69,7 @@ export class WishlistsService {
       },
     });
 
-    if (!wishlist) throw new NotFoundException();
+    if (!wishlist) throw new NotFoundException(WISHLIST_NOT_FOUND);
 
     delete wishlist.owner.email;
     delete wishlist.owner.password;
@@ -83,7 +84,8 @@ export class WishlistsService {
   ): Promise<UpdateResult> {
     const wishlist = await this.findOne(id);
 
-    if (wishlist.owner.id !== userId) throw new ConflictException();
+    if (wishlist.owner.id !== userId)
+      throw new ConflictException(INSUFFICIENT_ERROR);
 
     const wishes = await Promise.all(
       updateWishlistDto.itemsId.map(async (item) => {
@@ -109,7 +111,8 @@ export class WishlistsService {
   async remove(id: number, userId: number): Promise<DeleteResult> {
     const wishlist = await this.findOne(id);
 
-    if (wishlist.owner.id !== userId) throw new ConflictException();
+    if (wishlist.owner.id !== userId)
+      throw new ConflictException(INSUFFICIENT_ERROR);
 
     return this.wishlistRepository.delete({ id });
   }

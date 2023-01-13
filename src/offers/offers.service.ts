@@ -1,5 +1,6 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { OWNER_ERROR, RAISER_ERROR } from 'src/config/errors';
 import { UsersService } from 'src/users/users.service';
 import { WishesService } from 'src/wishes/wishes.service';
 import { Repository } from 'typeorm';
@@ -19,11 +20,11 @@ export class OffersService {
     const user = await this.usersService.findOne(userId);
     const wish = await this.wishesService.findOne(createOfferDto.itemId);
 
-    if (wish.owner.id === userId) throw new ConflictException();
+    if (wish.owner.id === userId) throw new ConflictException(OWNER_ERROR);
 
     const raised = Number(createOfferDto.amount) + Number(wish.raised);
 
-    if (raised > wish.price) throw new ConflictException();
+    if (raised > wish.price) throw new ConflictException(RAISER_ERROR);
 
     await this.wishesService.updateRaised(wish.id, raised);
 

@@ -14,6 +14,8 @@ import { CreateWishDto } from './dto/create-wish.dto';
 import { UpdateWishDto } from './dto/update-wish.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { User } from 'src/users/entities/user.entity';
+import { Wish } from './entities/wish.entity';
+import { DeleteResult, UpdateResult } from 'typeorm';
 
 @Controller('wishes')
 export class WishesController {
@@ -24,23 +26,23 @@ export class WishesController {
   create(
     @Req() { user }: { user: User },
     @Body() createWishDto: CreateWishDto,
-  ) {
+  ): Promise<Wish> {
     return this.wishesService.create(user.id, createWishDto);
   }
 
   @Get('last')
-  async findLast() {
+  async findLast(): Promise<Wish[]> {
     return await this.wishesService.findLast();
   }
 
   @Get('top')
-  async findTop() {
+  async findTop(): Promise<Wish[]> {
     return await this.wishesService.findTop();
   }
 
   @UseGuards(AuthGuard('jwt'))
   @Get(':id')
-  async findOne(@Param('id') id: number) {
+  async findOne(@Param('id') id: number): Promise<Wish> {
     return await this.wishesService.findOne(+id);
   }
 
@@ -50,19 +52,25 @@ export class WishesController {
     @Req() { user }: { user: User },
     @Param('id') id: number,
     @Body() updateWishDto: UpdateWishDto,
-  ) {
+  ): Promise<UpdateResult> {
     return await this.wishesService.update(+id, user.id, updateWishDto);
   }
 
   @UseGuards(AuthGuard('jwt'))
   @Delete(':id')
-  async remove(@Req() { user }: { user: User }, @Param('id') id: number) {
+  async remove(
+    @Req() { user }: { user: User },
+    @Param('id') id: number,
+  ): Promise<DeleteResult> {
     return await this.wishesService.remove(+id, user.id);
   }
 
   @UseGuards(AuthGuard('jwt'))
   @Post(':id/copy')
-  async copy(@Req() { user }: { user: User }, @Param('id') id: number) {
+  async copy(
+    @Req() { user }: { user: User },
+    @Param('id') id: number,
+  ): Promise<Wish> {
     return await this.wishesService.copy(+id, user.id);
   }
 }
