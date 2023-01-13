@@ -22,7 +22,7 @@ export class OffersController {
   async create(
     @Req() { user }: { user: User },
     @Body() createOfferDto: CreateOfferDto,
-  ): Promise<Offer> {
+  ): Promise<object> {
     return await this.offersService.create(user.id, createOfferDto);
   }
 

@@ -15,7 +15,6 @@ import { UpdateWishlistDto } from './dto/update-wishlist.dto';
 import { User } from 'src/users/entities/user.entity';
 import { AuthGuard } from '@nestjs/passport';
 import { Wishlist } from './entities/wishlist.entity';
-import { DeleteResult, UpdateResult } from 'typeorm';
 
 @UseGuards(AuthGuard('jwt'))
 @Controller('wishlistlists')
@@ -45,7 +44,7 @@ export class WishlistsController {
     @Req() { user }: { user: User },
     @Param('id') id: number,
     @Body() updateWishlistDto: UpdateWishlistDto,
-  ): Promise<UpdateResult> {
+  ): Promise<Wishlist> {
     return await this.wishlistsService.update(+id, user.id, updateWishlistDto);
   }
 
@@ -53,7 +52,7 @@ export class WishlistsController {
   async remove(
     @Req() { user }: { user: User },
     @Param('id') id: number,
-  ): Promise<DeleteResult> {
+  ): Promise<Wishlist> {
     return await this.wishlistsService.remove(+id, user.id);
   }
 }

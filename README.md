@@ -28,6 +28,7 @@ npm run start:dev
 
 - PORT
 - JWT_SECRET
+- JWT_EXPIRES
 - DB_TYPE
 - DB_HOST
 - DB_PORT

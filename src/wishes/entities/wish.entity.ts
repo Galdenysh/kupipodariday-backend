@@ -1,11 +1,4 @@
-import {
-  IsDate,
-  IsInt,
-  IsNumber,
-  IsString,
-  IsUrl,
-  Length,
-} from 'class-validator';
+import { IsDate, IsInt, IsString, IsUrl, Length } from 'class-validator';
 import { Offer } from 'src/offers/entities/offer.entity';
 import { User } from 'src/users/entities/user.entity';
 import { toFixed } from 'src/utils/toFixed';
@@ -53,7 +46,7 @@ export class Wish {
 
   // price
   @Column({
-    type: 'numeric',
+    type: 'int',
     transformer: {
       from(value: number) {
         return value;
@@ -63,11 +56,12 @@ export class Wish {
       },
     },
   })
+  @IsInt()
   price: number;
 
   // raised
   @Column({
-    type: 'numeric',
+    type: 'int',
     default: 0,
     transformer: {
       from(value: number) {
@@ -78,6 +72,7 @@ export class Wish {
       },
     },
   })
+  @IsInt()
   raised: number;
 
   // description

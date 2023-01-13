@@ -13,9 +13,9 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { User } from './entities/user.entity';
-import { UpdateResult } from 'typeorm';
 import { Wish } from 'src/wishes/entities/wish.entity';
 import { GetUserDto } from './dto/get-user.dto';
+import { GetUserPublicDto } from './dto/get-user-public.dto';
 
 @UseGuards(AuthGuard('jwt'))
 @Controller('users')
@@ -28,7 +28,7 @@ export class UsersController {
   }
 
   @Get('me')
-  async findMe(@Req() { user }: { user: User }): Promise<User> {
+  async findMe(@Req() { user }: { user: User }): Promise<GetUserDto> {
     return await this.usersService.findOne(user.id);
   }
 
@@ -36,7 +36,7 @@ export class UsersController {
   async updateMe(
     @Req() { user }: { user: User },
     @Body() updateUserDto: UpdateUserDto,
-  ): Promise<UpdateResult> {
+  ): Promise<GetUserDto> {
     return await this.usersService.update(user.id, updateUserDto);
   }
 
@@ -45,15 +45,10 @@ export class UsersController {
     return await this.usersService.findWishes(user.id);
   }
 
-  @Post('find')
-  async findUser(@Body() { query }: { query: string }): Promise<GetUserDto[]> {
-    return await this.usersService.findMany(query);
-  }
-
   @Get(':username')
   async findByUsername(
     @Param('username') username: string,
-  ): Promise<GetUserDto> {
+  ): Promise<GetUserPublicDto> {
     return await this.usersService.findByUsernamePublic(username);
   }
 
@@ -62,5 +57,10 @@ export class UsersController {
     const user = await this.usersService.findByUsernamePublic(username);
 
     return await this.usersService.findWishes(user.id);
+  }
+
+  @Post('find')
+  async findUser(@Body() { query }: { query: string }): Promise<GetUserDto[]> {
+    return await this.usersService.findMany(query);
   }
 }

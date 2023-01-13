@@ -10,7 +10,7 @@ import {
   WISH_NOT_FOUND,
 } from 'src/config/errors';
 import { UsersService } from 'src/users/users.service';
-import { DeleteResult, Repository, UpdateResult } from 'typeorm';
+import { Repository, UpdateResult } from 'typeorm';
 import { CreateWishDto } from './dto/create-wish.dto';
 import { UpdateWishDto } from './dto/update-wish.dto';
 import { Wish } from './entities/wish.entity';
@@ -23,7 +23,7 @@ export class WishesService {
     private usersService: UsersService,
   ) {}
 
-  async create(id: number, createWishDto: CreateWishDto): Promise<Wish> {
+  async create(id: number, createWishDto: CreateWishDto): Promise<object> {
     const user = await this.usersService.findOne(id);
     const wish = this.wishRepository.create({
       owner: user,
@@ -33,7 +33,9 @@ export class WishesService {
     delete wish.owner.email;
     delete wish.owner.password;
 
-    return await this.wishRepository.save(wish);
+    await this.wishRepository.save(wish);
+
+    return {};
   }
 
   async findLast(): Promise<Wish[]> {
@@ -93,7 +95,7 @@ export class WishesService {
     id: number,
     ownerId: number,
     updateWishDto: UpdateWishDto,
-  ): Promise<UpdateResult> {
+  ): Promise<object> {
     const wish = await this.wishRepository.findOneBy({ id });
 
     if (!wish) throw new NotFoundException(WISH_NOT_FOUND);
@@ -103,7 +105,9 @@ export class WishesService {
     if (wish.owner.id !== ownerId)
       throw new ConflictException(INSUFFICIENT_ERROR);
 
-    return this.wishRepository.update({ id }, updateWishDto);
+    this.wishRepository.update({ id }, updateWishDto);
+
+    return {};
   }
 
   async updateRaised(id: number, raised: number): Promise<UpdateResult> {
@@ -114,7 +118,7 @@ export class WishesService {
     return this.wishRepository.update({ id }, { raised });
   }
 
-  async remove(id: number, ownerId: number): Promise<DeleteResult> {
+  async remove(id: number, ownerId: number): Promise<Wish> {
     const wish = await this.wishRepository.findOne({
       where: { id },
       relations: { owner: true },
@@ -125,10 +129,12 @@ export class WishesService {
     if (wish.owner.id !== ownerId)
       throw new ConflictException(INSUFFICIENT_ERROR);
 
-    return await this.wishRepository.delete({ id });
+    await this.wishRepository.delete({ id });
+
+    return wish;
   }
 
-  async copy(id: number, ownerId: number): Promise<Wish> {
+  async copy(id: number, ownerId: number): Promise<object> {
     const wish = await this.wishRepository.findOneBy({ id });
 
     if (!wish) throw new NotFoundException(WISH_NOT_FOUND);

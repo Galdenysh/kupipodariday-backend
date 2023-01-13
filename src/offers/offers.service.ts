@@ -16,13 +16,16 @@ export class OffersService {
     private wishesService: WishesService,
   ) {}
 
-  async create(userId: number, createOfferDto: CreateOfferDto): Promise<Offer> {
+  async create(
+    userId: number,
+    createOfferDto: CreateOfferDto,
+  ): Promise<object> {
     const user = await this.usersService.findOne(userId);
     const wish = await this.wishesService.findOne(createOfferDto.itemId);
 
     if (wish.owner.id === userId) throw new ConflictException(OWNER_ERROR);
 
-    const raised = Number(createOfferDto.amount) + Number(wish.raised);
+    const raised = createOfferDto.amount + wish.raised;
 
     if (raised > wish.price) throw new ConflictException(RAISER_ERROR);
 
@@ -34,12 +37,11 @@ export class OffersService {
       ...createOfferDto,
     };
 
-    delete offerData.user.email;
-    delete offerData.user.password;
-
     const offer = this.offerRepository.create(offerData);
 
-    return await this.offerRepository.save(offer);
+    await this.offerRepository.save(offer);
+
+    return {};
   }
 
   async findAll(): Promise<Offer[]> {
@@ -51,7 +53,6 @@ export class OffersService {
     });
 
     offers.forEach((item) => {
-      delete item.user.email;
       delete item.user.password;
     });
 
@@ -67,7 +68,6 @@ export class OffersService {
       },
     });
 
-    delete offer.user.email;
     delete offer.user.password;
 
     return offer;

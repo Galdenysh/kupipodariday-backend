@@ -1,6 +1,5 @@
 import {
   IsDate,
-  IsEmail,
   IsInt,
   IsNotEmpty,
   IsString,
@@ -8,7 +7,7 @@ import {
   Length,
 } from 'class-validator';
 
-export class GetUserDto {
+export class GetUserPublicDto {
   @IsInt()
   @IsNotEmpty()
   id: number;
@@ -25,10 +24,6 @@ export class GetUserDto {
   @Length(2, 30)
   @IsNotEmpty()
   username: string;
-
-  @IsEmail()
-  @IsNotEmpty()
-  email: string;
 
   @IsString()
   @Length(2, 200)

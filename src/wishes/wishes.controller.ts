@@ -15,7 +15,6 @@ import { UpdateWishDto } from './dto/update-wish.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { User } from 'src/users/entities/user.entity';
 import { Wish } from './entities/wish.entity';
-import { DeleteResult, UpdateResult } from 'typeorm';
 
 @Controller('wishes')
 export class WishesController {
@@ -26,7 +25,7 @@ export class WishesController {
   create(
     @Req() { user }: { user: User },
     @Body() createWishDto: CreateWishDto,
-  ): Promise<Wish> {
+  ): Promise<object> {
     return this.wishesService.create(user.id, createWishDto);
   }
 
@@ -52,7 +51,7 @@ export class WishesController {
     @Req() { user }: { user: User },
     @Param('id') id: number,
     @Body() updateWishDto: UpdateWishDto,
-  ): Promise<UpdateResult> {
+  ): Promise<object> {
     return await this.wishesService.update(+id, user.id, updateWishDto);
   }
 
@@ -61,7 +60,7 @@ export class WishesController {
   async remove(
     @Req() { user }: { user: User },
     @Param('id') id: number,
-  ): Promise<DeleteResult> {
+  ): Promise<Wish> {
     return await this.wishesService.remove(+id, user.id);
   }
 
@@ -70,7 +69,7 @@ export class WishesController {
   async copy(
     @Req() { user }: { user: User },
     @Param('id') id: number,
-  ): Promise<Wish> {
+  ): Promise<object> {
     return await this.wishesService.copy(+id, user.id);
   }
 }
