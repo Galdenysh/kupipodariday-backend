@@ -1,6 +1,7 @@
 import { IsDate, IsNumber, IsString, IsUrl, Length } from 'class-validator';
 import { Offer } from 'src/offers/entities/offer.entity';
 import { User } from 'src/users/entities/user.entity';
+import { toFixed } from 'src/utils/toFixed';
 import {
   Column,
   CreateDateColumn,
@@ -51,11 +52,7 @@ export class Wish {
         return value;
       },
       to(value: number) {
-        if (value) {
-          if (!Number.isInteger(value)) return value.toFixed(2);
-        }
-
-        return value;
+        return toFixed(value, 2);
       },
     },
   })
@@ -70,11 +67,7 @@ export class Wish {
         return value;
       },
       to(value: number) {
-        if (value) {
-          if (!Number.isInteger(value)) return value.toFixed(2);
-        }
-
-        return value;
+        return toFixed(value, 2);
       },
     },
   })
